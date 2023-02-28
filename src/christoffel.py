@@ -14,12 +14,29 @@ def calculate_christoffel_symbol(metric_with_lower_indices, variables, lower_var
 	])
 
 def print_all_christoffel_symbols(metric_tensor_with_lower_indices, variables):
+	# TODO: this could be sped up
+	#  the metric with upper indices doesn't need to be recomputed every iteration
+	#  swapping the lower variables doesn't change the Christoffel symbol
 	for upper_variable in variables:
 		for lower_variable_one in variables:
 			for lower_variable_two in variables:
-				result = calculate_christoffel_symbol(metric_tensor_with_lower_indices, variables, lower_variable_one, lower_variable_two, upper_variable)
+				result = calculate_christoffel_symbol(
+					metric_tensor_with_lower_indices,
+					variables,
+					lower_variable_one,
+					lower_variable_two,
+					upper_variable
+				)
 				if result != 0:
-					pretty_print(LatexExpr(r"\Gamma^{") + latex(upper_variable) + LatexExpr(r"}_{") + latex(lower_variable_one) + latex(lower_variable_two) + LatexExpr(r"} = ") + latex(result.simplify_full().expand()))
+					pretty_print(
+						LatexExpr(r"\Gamma^{")
+						+ latex(upper_variable)
+						+ LatexExpr(r"}_{")
+						+ latex(lower_variable_one)
+						+ latex(lower_variable_two)
+						+ LatexExpr(r"} = ")
+						+ latex(result.simplify_full().expand())
+					)
 					print()
 
 if __name__ == "__main__":
