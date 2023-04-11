@@ -1,11 +1,9 @@
 import itertools
 from sage.all import *
 
-def calculate_christoffel_symbol(metric_with_lower_indices, variables, upper_variable, lower_variable_one, lower_variable_two):
-	lower_index_one = variables.index(lower_variable_one)
-	lower_index_two = variables.index(lower_variable_two)
-	upper_index = variables.index(upper_variable)
-	metric_with_upper_indices = metric_with_lower_indices.inverse()
+def calculate_single_christoffel_symbol_with_both_metrics(metric_with_lower_indices, metric_with_upper_indices, variables, upper_index, lower_index_one, lower_index_two):
+	lower_variable_one = variables[lower_index_one]
+	lower_variable_two = variables[lower_index_two]
 	return 1 / 2 * sum([
 		metric_with_upper_indices[upper_index][i] * (
 			derivative(metric_with_lower_indices[i][lower_index_two], lower_variable_one)
@@ -14,24 +12,32 @@ def calculate_christoffel_symbol(metric_with_lower_indices, variables, upper_var
 		) for i in range(len(variables))
 	])
 
+def calculate_christoffel_symbol(metric_with_lower_indices, variables, upper_variable, lower_variable_one, lower_variable_two):
+	metric_with_upper_indices = metric_with_lower_indices.inverse()
+	return calculate_single_christoffel_symbol_with_both_metrics(
+		metric_with_lower_indices,
+		metric_with_upper_indices,
+		variables,
+		variables.index(upper_variable),
+		variables.index(lower_variable_one),
+		variables.index(lower_variable_two)
+	)
+
 def calculate_all_christoffel_symbols(metric_with_lower_indices, variables):
 	metric_with_upper_indices = metric_with_lower_indices.inverse()
-	def calculate_single_christoffel_symbol(upper_index, lower_index_one, lower_index_two):
-		lower_variable_one = variables[lower_index_one]
-		lower_variable_two = variables[lower_index_two]
-		return 1 / 2 * sum([
-			metric_with_upper_indices[upper_index][i] * (
-				derivative(metric_with_lower_indices[i][lower_index_two], lower_variable_one)
-				+ derivative(metric_with_lower_indices[lower_index_one][i], lower_variable_two)
-				- derivative(metric_with_lower_indices[lower_index_one][lower_index_two], variables[i])
-			) for i in range(len(variables))
-		])
 	all_christoffel_symbols = [[[None for _ in variables] for _ in variables] for _ in variables]
 	for i, _ in enumerate(variables):
 		for lower_variable_one, lower_variable_two in itertools.combinations_with_replacement(variables, 2):
 			j = variables.index(lower_variable_one)
 			k = variables.index(lower_variable_two)
-			all_christoffel_symbols[i][j][k] = calculate_single_christoffel_symbol(i, j, k)
+			all_christoffel_symbols[i][j][k] = calculate_single_christoffel_symbol_with_both_metrics(
+				metric_with_lower_indices,
+				metric_with_upper_indices,
+				variables,
+				i,
+				j,
+				k
+			)
 			all_christoffel_symbols[i][k][j] = all_christoffel_symbols[i][j][k]
 	return all_christoffel_symbols
 
