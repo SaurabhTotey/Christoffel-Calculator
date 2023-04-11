@@ -33,10 +33,9 @@ def calculate_all_ricci_tensor_values(metric_with_lower_indices, variables):
 	return ricci_tensor
 
 def calculate_ricci_scalar(metric_with_lower_indices, variables):
-	christoffels = christoffel.calculate_all_christoffel_symbols(metric_with_lower_indices, variables)
-	return sum([
-		calculate_single_ricci_tensor_value_with_all_connection_coefficients(christoffels, variables, i, i) for i in range(len(variables))
-	])
+	metric_with_upper_indices = metric_with_lower_indices.inverse()
+	ricci_tensor = calculate_all_ricci_tensor_values(metric_with_lower_indices, variables)
+	return sum([metric_with_upper_indices[i][j] * ricci_tensor[i][j] for i in range(len(variables)) for j in range(len(variables))])
 
 if __name__ == "__main__":
 	r, phi, theta = var("r"), var("phi", latex_name=r"\phi"), var("theta", latex_name=r"\theta")
